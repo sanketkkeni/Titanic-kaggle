@@ -338,6 +338,9 @@ clf = RandomForestClassifier(n_estimators=100)
 # Training data features, skip the first column 'Survived'
 train_features = train_data[:, 1:]
 
+train_features = pd.DataFrame(train_features).apply(lambda x: x/x.max(), axis=0)
+train_features = train_features.values
+
 # 'Survived' column values
 train_target = train_data[:, 0]
 
@@ -345,18 +348,30 @@ train_target = train_data[:, 0]
 clf = clf.fit(train_features, train_target)
 score = clf.score(train_features, train_target)
 "Mean accuracy of Random Forest: {0}".format(score)
+
+
+##### Output to csv for kaggle using scaling
+
 df_test = pd.read_csv('C:\\Users\\Sanket Keni\\Desktop\\Genesis\\titanic\\test.csv')
 df_test.head()
-
 # Data wrangle the test set and convert it to a numpy array
 df_test = clean_data(df_test, drop_passenger_id=False)
 test_data = df_test.values
-
 # Get the test data features, skipping the first column 'PassengerId'
 test_x = test_data[:, 1:]
-
+ID = test_data[:, 0]
+ID = ID.astype('int32')
+test_x = pd.DataFrame(test_x).apply(lambda x: x/x.max(), axis=0)
+test_x = test_x.values
 # Predict the Survival values for the test data
-test_y = clf.predict(test_x)
+out = clf.predict(test_x)
+out = out.astype('int32')
+out = pd.DataFrame(out)
+ID = pd.DataFrame(ID)
+out=pd.concat([ID,out], axis = 1)
+out.columns = ['PassengerId', 'Survived']
+out.to_csv('C:\\Users\\Sanket Keni\\Desktop\\Genesis\\titanic\\out.csv', index=False)
+##################
 
 
 
